@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FP&A Mental Math Trainer</title>
+<title>Mental Math App</title>
 <style>
   body {
     font-family: Arial, sans-serif;
@@ -137,17 +137,17 @@
 <body>
 <div class="container">
 
-  <h1>FP&A Mental Math</h1>
+  <h1>Mental Math App</h1>
 
   <div class="card">
     <label>Question type</label>
     <select id="mode">
       <option value="mixed">Mixed</option>
-      <option value="growth">Growth %</option>
-      <option value="gap">Gap to Target</option>
-      <option value="uplift">Required Uplift %</option>
-      <option value="pipeline">Pipeline Conversion</option>
-      <option value="yield">Yield Headroom</option>
+      <option value="addition">Addition</option>
+      <option value="subtraction">Subtraction</option>
+      <option value="multiplication">Multiplication</option>
+      <option value="division">Division</option>
+      <option value="percentages">Percentages</option>
     </select>
 
     <label>Level</label>
@@ -201,7 +201,7 @@
 
   <div class="card">
     <div id="question" class="question">Press Start Round</div>
-    <div id="hint" class="hint">Answer as a plain number. For percentages, enter 12.5 not 12.5%.</div>
+    <div id="hint" class="hint">Answer as a plain number. For percentages, enter just the number, for example 12.5</div>
     <input id="answer" type="number" step="any" placeholder="Type answer here">
     <button onclick="submitAnswer()">Submit</button>
     <button class="secondary" onclick="skipQuestion()">Skip</button>
@@ -237,8 +237,13 @@ function round1(n) {
   return Math.round(n * 10) / 10;
 }
 
+function round2(n) {
+  return Math.round(n * 100) / 100;
+}
+
 function fmt(n) {
-  return Math.abs(n - Math.round(n)) < 0.0001 ? String(Math.round(n)) : String(round1(n));
+  if (Math.abs(n - Math.round(n)) < 0.0001) return String(Math.round(n));
+  return String(round2(n));
 }
 
 function getLevel() {
@@ -253,24 +258,6 @@ function getAnswerMode() {
   return document.getElementById("answerMode").value;
 }
 
-function money(level) {
-  if (level === 0) return pick([20, 40, 50, 60]);
-  if (level === 1) return pick([20, 30, 40, 50, 60, 80, 100]);
-  if (level === 2) return pick([35, 45, 60, 75, 90, 120]);
-  if (level === 3) return randInt(50, 200);
-  if (level === 4) return round1(Math.random() * 220 + 40);
-  return round1(Math.random() * 350 + 50);
-}
-
-function percent(level, allowDecimal = false) {
-  if (level === 0) return pick([10, 20, 25]);
-  if (level === 1) return pick([5, 10, 20, 25]);
-  if (level === 2) return pick([8, 12, 15, 18]);
-  if (level === 3) return allowDecimal ? pick([7.5, 9.5, 12.5, 17.5]) : pick([7, 9, 11, 13, 17]);
-  if (level === 4) return allowDecimal ? pick([6.5, 8.5, 11.5, 14.5, 18.5]) : pick([6, 8, 11, 14, 18]);
-  return allowDecimal ? round1(Math.random() * 18 + 4) : randInt(4, 22);
-}
-
 function tolerance(correctAnswer) {
   if (getAnswerMode() === "exact") return 0.05;
   const absVal = Math.abs(correctAnswer);
@@ -279,139 +266,254 @@ function tolerance(correctAnswer) {
   return absVal * 0.025;
 }
 
-function makeGrowthQuestion(level) {
-  let start, pct, end;
+function levelNumbers(level) {
+  if (level === 0) return { min: 1, max: 10 };
+  if (level === 1) return { min: 1, max: 20 };
+  if (level === 2) return { min: 5, max: 40 };
+  if (level === 3) return { min: 10, max: 80 };
+  if (level === 4) return { min: 20, max: 150 };
+  return { min: 25, max: 250 };
+}
 
+function makeAdditionQuestion(level) {
   if (level === 0) {
-    start = pick([50, 80, 100]);
-    pct = pick([10, 20, 25]);
-    end = start * (1 + pct / 100);
-  } else if (level === 1) {
-    const examples = [
-      [100, 110], [80, 100], [60, 75], [50, 60], [40, 50]
-    ];
-    [start, end] = pick(examples);
-  } else {
-    start = money(level);
-    pct = percent(level, level >= 3);
-    end = round1(start * (1 + pct / 100));
+    const a = randInt(1, 10);
+    const b = randInt(1, 10);
+    return {
+      text: `${a} + ${b}`,
+      hint: "Add the two numbers",
+      answer: a + b
+    };
   }
 
-  const answer = round1(((end - start) / start) * 100);
+  const r = levelNumbers(level);
+  let a = randInt(r.min, r.max);
+  let b = randInt(r.min, r.max);
+
+  if (level >= 4) {
+    a = round1(Math.random() * (r.max - r.min) + r.min);
+    b = round1(Math.random() * (r.max - r.min) + r.min);
+  }
 
   return {
-    text: `Revenue moves from $${fmt(start)}m to $${fmt(end)}m. What is the growth %?`,
-    hint: "Enter the percentage only, e.g. 12.5",
-    answer
+    text: `${fmt(a)} + ${fmt(b)}`,
+    hint: "Add the two numbers",
+    answer: round2(a + b)
   };
 }
 
-function makeGapQuestion(level) {
-  let current, target;
-
+function makeSubtractionQuestion(level) {
   if (level === 0) {
-    current = pick([40, 50, 60]);
-    target = current + pick([10, 20]);
-  } else if (level === 1) {
-    current = pick([55, 62, 70, 72, 80]);
-    target = current + pick([8, 10, 12, 15]);
-  } else if (level === 2) {
-    current = pick([45, 60, 75, 90, 110]);
-    target = current + pick([12, 18, 20, 25]);
-  } else {
-    current = money(level);
-    target = round1(current + (level <= 3 ? randInt(10, 35) : Math.random() * 45 + 10));
+    let a = randInt(5, 15);
+    let b = randInt(1, a);
+    return {
+      text: `${a} - ${b}`,
+      hint: "Subtract the second number from the first",
+      answer: a - b
+    };
+  }
+
+  const r = levelNumbers(level);
+  let a = randInt(r.min + 10, r.max + 20);
+  let b = randInt(r.min, a);
+
+  if (level >= 4) {
+    a = round1(Math.random() * (r.max - r.min) + r.min + 20);
+    b = round1(Math.random() * Math.min(a - 1, r.max));
   }
 
   return {
-    text: `Current landing is $${fmt(current)}m and target is $${fmt(target)}m. What is the gap to target in $m?`,
-    hint: "Enter the $m gap only",
-    answer: round1(target - current)
+    text: `${fmt(a)} - ${fmt(b)}`,
+    hint: "Subtract the second number from the first",
+    answer: round2(a - b)
   };
 }
 
-function makeUpliftQuestion(level) {
-  let forecast, target;
-
+function makeMultiplicationQuestion(level) {
   if (level === 0) {
-    forecast = pick([50, 80, 100]);
-    target = forecast * 1.2;
-  } else if (level === 1) {
-    const examples = [
-      [100, 110], [80, 100], [60, 72], [50, 60]
-    ];
-    [forecast, target] = pick(examples);
-  } else {
-    forecast = money(level);
-    const pct = percent(level, level >= 3);
-    target = round1(forecast * (1 + pct / 100));
+    const a = randInt(2, 5);
+    const b = randInt(2, 10);
+    return {
+      text: `${a} × ${b}`,
+      hint: "Multiply the two numbers",
+      answer: a * b
+    };
   }
 
+  if (level === 1) {
+    const a = randInt(2, 10);
+    const b = randInt(2, 12);
+    return {
+      text: `${a} × ${b}`,
+      hint: "Multiply the two numbers",
+      answer: a * b
+    };
+  }
+
+  if (level === 2) {
+    const a = randInt(4, 15);
+    const b = randInt(4, 15);
+    return {
+      text: `${a} × ${b}`,
+      hint: "Multiply the two numbers",
+      answer: a * b
+    };
+  }
+
+  if (level === 3) {
+    const a = randInt(8, 25);
+    const b = randInt(6, 20);
+    return {
+      text: `${a} × ${b}`,
+      hint: "Multiply the two numbers",
+      answer: a * b
+    };
+  }
+
+  if (level === 4) {
+    const a = randInt(12, 40);
+    const b = randInt(8, 25);
+    return {
+      text: `${a} × ${b}`,
+      hint: "Multiply the two numbers",
+      answer: a * b
+    };
+  }
+
+  const a = randInt(15, 60);
+  const b = randInt(12, 35);
   return {
-    text: `Forecast is $${fmt(forecast)}m and target is $${fmt(target)}m. What % uplift is required from forecast to hit target?`,
-    hint: "Enter the uplift percentage",
-    answer: round1(((target - forecast) / forecast) * 100)
+    text: `${a} × ${b}`,
+    hint: "Multiply the two numbers",
+    answer: a * b
   };
 }
 
-function makePipelineQuestion(level) {
-  let pipe, conv;
-
+function makeDivisionQuestion(level) {
   if (level === 0) {
-    pipe = pick([40, 60, 80, 100]);
-    conv = pick([10, 20, 25]);
-  } else if (level === 1) {
-    pipe = pick([40, 60, 80, 100]);
-    conv = pick([10, 20, 25]);
-  } else if (level === 2) {
-    pipe = pick([45, 70, 90, 120]);
-    conv = pick([8, 12, 15, 20]);
-  } else {
-    pipe = money(level);
-    conv = percent(level, level >= 3);
+    const b = randInt(2, 10);
+    const ans = randInt(1, 10);
+    const a = b * ans;
+    return {
+      text: `${a} ÷ ${b}`,
+      hint: "Divide the first number by the second",
+      answer: ans
+    };
   }
 
+  if (level <= 2) {
+    const b = randInt(2, 12);
+    const ans = randInt(2, 20);
+    const a = b * ans;
+    return {
+      text: `${a} ÷ ${b}`,
+      hint: "Divide the first number by the second",
+      answer: ans
+    };
+  }
+
+  if (level === 3) {
+    const b = randInt(3, 15);
+    const ans = randInt(4, 25);
+    const a = b * ans;
+    return {
+      text: `${a} ÷ ${b}`,
+      hint: "Divide the first number by the second",
+      answer: ans
+    };
+  }
+
+  if (level === 4) {
+    const b = pick([4, 5, 8, 10, 20, 25]);
+    const ans = round1(Math.random() * 30 + 5);
+    const a = round1(b * ans);
+    return {
+      text: `${fmt(a)} ÷ ${fmt(b)}`,
+      hint: "Divide the first number by the second",
+      answer: round2(ans)
+    };
+  }
+
+  const b = pick([3, 4, 5, 6, 8, 10, 12, 15, 20, 25]);
+  const ans = round1(Math.random() * 40 + 5);
+  const a = round1(b * ans);
   return {
-    text: `Open pipeline is $${fmt(pipe)}m with ${fmt(conv)}% expected conversion. How much NB should this convert into in $m?`,
-    hint: "Enter the converted $m",
-    answer: round1(pipe * conv / 100)
+    text: `${fmt(a)} ÷ ${fmt(b)}`,
+    hint: "Divide the first number by the second",
+    answer: round2(ans)
   };
 }
 
-function makeYieldQuestion(level) {
-  let weighted, quoted;
-
+function makePercentageQuestion(level) {
   if (level === 0) {
-    weighted = pick([4, 5, 6]);
-    quoted = weighted + pick([2, 3]);
-  } else if (level === 1) {
-    weighted = pick([5, 6, 8, 10]);
-    quoted = weighted + pick([2, 3, 4]);
-  } else if (level === 2) {
-    weighted = pick([6, 8, 10, 12, 15]);
-    quoted = weighted + pick([2, 4, 5]);
-  } else {
-    weighted = round1((level <= 3 ? randInt(4, 18) : Math.random() * 18 + 4));
-    quoted = round1(weighted + (level <= 3 ? randInt(2, 8) : Math.random() * 8 + 2));
+    const base = pick([20, 40, 50, 80, 100]);
+    const pct = pick([10, 20, 25, 50]);
+    return {
+      text: `${pct}% of ${base}`,
+      hint: "Work out the percentage of the number",
+      answer: base * pct / 100
+    };
   }
 
+  if (level === 1) {
+    const base = pick([20, 40, 60, 80, 100, 120]);
+    const pct = pick([5, 10, 20, 25, 50]);
+    return {
+      text: `${pct}% of ${base}`,
+      hint: "Work out the percentage of the number",
+      answer: base * pct / 100
+    };
+  }
+
+  if (level === 2) {
+    const base = pick([35, 45, 60, 75, 90, 120, 150]);
+    const pct = pick([8, 12, 15, 20, 25]);
+    return {
+      text: `${pct}% of ${base}`,
+      hint: "Work out the percentage of the number",
+      answer: round2(base * pct / 100)
+    };
+  }
+
+  if (level === 3) {
+    const base = randInt(40, 250);
+    const pct = pick([7, 9, 11, 12.5, 15, 17.5, 20]);
+    return {
+      text: `${pct}% of ${base}`,
+      hint: "Work out the percentage of the number",
+      answer: round2(base * pct / 100)
+    };
+  }
+
+  if (level === 4) {
+    const base = round1(Math.random() * 250 + 50);
+    const pct = pick([6.5, 7.5, 8.5, 11.5, 12.5, 14.5, 17.5, 22.5]);
+    return {
+      text: `${pct}% of ${fmt(base)}`,
+      hint: "Work out the percentage of the number",
+      answer: round2(base * pct / 100)
+    };
+  }
+
+  const base = round1(Math.random() * 400 + 80);
+  const pct = round1(Math.random() * 20 + 5);
   return {
-    text: `Weighted uplift is $${fmt(weighted)}m and quoted uplift is $${fmt(quoted)}m. What is the extra headroom from weighted to quoted in $m?`,
-    hint: "Enter the headroom in $m",
-    answer: round1(quoted - weighted)
+    text: `${fmt(pct)}% of ${fmt(base)}`,
+    hint: "Work out the percentage of the number",
+    answer: round2(base * pct / 100)
   };
 }
 
 function generateQuestionByMode(mode) {
   const level = getLevel();
 
-  if (mode === "growth") return makeGrowthQuestion(level);
-  if (mode === "gap") return makeGapQuestion(level);
-  if (mode === "uplift") return makeUpliftQuestion(level);
-  if (mode === "pipeline") return makePipelineQuestion(level);
-  if (mode === "yield") return makeYieldQuestion(level);
+  if (mode === "addition") return makeAdditionQuestion(level);
+  if (mode === "subtraction") return makeSubtractionQuestion(level);
+  if (mode === "multiplication") return makeMultiplicationQuestion(level);
+  if (mode === "division") return makeDivisionQuestion(level);
+  if (mode === "percentages") return makePercentageQuestion(level);
 
-  const modes = ["growth", "gap", "uplift", "pipeline", "yield"];
+  const modes = ["addition", "subtraction", "multiplication", "division", "percentages"];
   return generateQuestionByMode(pick(modes));
 }
 
@@ -480,7 +582,7 @@ function resetRound() {
   active = false;
   currentQuestion = null;
   document.getElementById("question").innerText = "Press Start Round";
-  document.getElementById("hint").innerText = "Answer as a plain number. For percentages, enter 12.5 not 12.5%.";
+  document.getElementById("hint").innerText = "Answer as a plain number. For percentages, enter just the number, for example 12.5";
   document.getElementById("feedback").innerHTML = "";
   document.getElementById("answer").value = "";
   updateStats();
