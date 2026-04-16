@@ -1,69 +1,153 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mental Math Trainer</title>
+<title>FP&A Mental Math Trainer</title>
+
 <style>
-body { font-family: Arial; text-align: center; background: #0f172a; color: white; }
-button { padding: 15px; margin: 10px; font-size: 18px; width: 80%; border-radius: 10px; }
-input { padding: 15px; font-size: 20px; width: 80%; text-align: center; }
+body { font-family: Arial; background:#0f172a; color:white; padding:15px; }
+h1 { text-align:center; }
+
+select, input, button {
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  font-size:16px;
+  border-radius:8px;
+  border:none;
+}
+
+button { background:#38bdf8; color:black; font-weight:bold; }
+
+.card {
+  background:#1e293b;
+  padding:15px;
+  border-radius:12px;
+  margin-bottom:15px;
+}
+
+.stats { display:flex; justify-content:space-between; }
+
+.question { font-size:22px; margin:15px 0; }
+
+.correct { color:#22c55e; }
+.wrong { color:#ef4444; }
 </style>
 </head>
 
 <body>
 
-<h2>Mental Math Trainer</h2>
+<h1>FP&A Mental Math</h1>
 
-<p id="timer">Time: 60</p>
-<p id="question">Press Start</p>
+<div class="card">
+<select id="mode">
+<option value="mixed">Mixed</option>
+<option value="growth">Growth %</option>
+<option value="gap">Gap to Target</option>
+<option value="uplift">Required Uplift</option>
+<option value="pipeline">Pipeline Conversion</option>
+</select>
 
-<input id="answer" type="number" placeholder="Your answer">
-<br>
+<select id="level">
+<option value="1">Level 1</option>
+<option value="2">Level 2</option>
+<option value="3">Level 3</option>
+</select>
 
 <button onclick="start()">Start Round</button>
-<button onclick="submitAnswer()">Submit</button>
+</div>
 
-<p id="score">Score: 0</p>
+<div class="card stats">
+<div>Time: <span id="time">0</span></div>
+<div>Score: <span id="score">0</span></div>
+</div>
+
+<div class="card">
+<div id="question" class="question">Press Start</div>
+<input id="answer" placeholder="Answer">
+<button onclick="submitAnswer()">Submit</button>
+<div id="feedback"></div>
+</div>
 
 <script>
+
 let time = 60;
 let score = 0;
-let currentAnswer = 0;
 let timer;
+let correctAnswer = 0;
 
-function randomQuestion() {
-    let a = Math.floor(Math.random()*90)+10;
-    let b = Math.floor(Math.random()*90)+10;
-    currentAnswer = Math.round(a * b / 10);
-    document.getElementById("question").innerText = a + " × " + b + " ÷ 10";
+function rand(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+
+function genQuestion(){
+  let mode = document.getElementById("mode").value;
+  let level = Number(document.getElementById("level").value);
+
+  let a = rand(50,150);
+  let b = rand(60,180);
+
+  if(mode === "growth"){
+    correctAnswer = ((b-a)/a*100).toFixed(1);
+    return `Revenue from ${a} to ${b}. Growth %?`;
+  }
+
+  if(mode === "gap"){
+    correctAnswer = (b-a).toFixed(1);
+    return `Current ${a}, Target ${b}. Gap?`;
+  }
+
+  if(mode === "uplift"){
+    correctAnswer = ((b-a)/a*100).toFixed(1);
+    return `Forecast ${a}, Target ${b}. Uplift %?`;
+  }
+
+  if(mode === "pipeline"){
+    let conv = rand(5,25);
+    correctAnswer = (a*conv/100).toFixed(1);
+    return `Pipeline ${a} @ ${conv}%. Convert to?`;
+  }
+
+  // mixed
+  return genQuestion(["growth","gap","uplift","pipeline"][rand(0,3)]);
 }
 
-function start() {
-    score = 0;
-    time = 60;
-    document.getElementById("score").innerText = "Score: 0";
-    randomQuestion();
+function start(){
+  score = 0;
+  time = 60;
+  document.getElementById("score").innerText = score;
 
-    timer = setInterval(() => {
-        time--;
-        document.getElementById("timer").innerText = "Time: " + time;
+  nextQuestion();
 
-        if (time <= 0) {
-            clearInterval(timer);
-            document.getElementById("question").innerText = "Time's up!";
-        }
-    }, 1000);
-}
-
-function submitAnswer() {
-    let user = Number(document.getElementById("answer").value);
-    if (user === currentAnswer) {
-        score++;
-        document.getElementById("score").innerText = "Score: " + score;
+  timer = setInterval(()=>{
+    time--;
+    document.getElementById("time").innerText = time;
+    if(time<=0){
+      clearInterval(timer);
+      document.getElementById("question").innerText = "Time up!";
     }
-    document.getElementById("answer").value = "";
-    randomQuestion();
+  },1000);
 }
+
+function nextQuestion(){
+  let q = genQuestion();
+  document.getElementById("question").innerText = q;
+  document.getElementById("answer").value = "";
+}
+
+function submitAnswer(){
+  let user = Number(document.getElementById("answer").value);
+
+  if(Math.abs(user - correctAnswer) < 1){
+    score++;
+    document.getElementById("feedback").innerHTML = "<span class='correct'>Correct</span>";
+  } else {
+    document.getElementById("feedback").innerHTML = "<span class='wrong'>Ans: "+correctAnswer+"</span>";
+  }
+
+  document.getElementById("score").innerText = score;
+  nextQuestion();
+}
+
 </script>
 
 </body>
