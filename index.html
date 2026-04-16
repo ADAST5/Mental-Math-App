@@ -4,151 +4,543 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FP&A Mental Math Trainer</title>
-
 <style>
-body { font-family: Arial; background:#0f172a; color:white; padding:15px; }
-h1 { text-align:center; }
+  body {
+    font-family: Arial, sans-serif;
+    background: #0f172a;
+    color: white;
+    padding: 15px;
+    margin: 0;
+  }
 
-select, input, button {
-  width:100%;
-  padding:12px;
-  margin-top:10px;
-  font-size:16px;
-  border-radius:8px;
-  border:none;
-}
+  .container {
+    max-width: 760px;
+    margin: 0 auto;
+  }
 
-button { background:#38bdf8; color:black; font-weight:bold; }
+  h1 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
 
-.card {
-  background:#1e293b;
-  padding:15px;
-  border-radius:12px;
-  margin-bottom:15px;
-}
+  .card {
+    background: #1e293b;
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 15px;
+  }
 
-.stats { display:flex; justify-content:space-between; }
+  select, input, button {
+    width: 100%;
+    padding: 14px;
+    margin-top: 10px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: none;
+    box-sizing: border-box;
+  }
 
-.question { font-size:22px; margin:15px 0; }
+  input {
+    background: white;
+    color: black;
+  }
 
-.correct { color:#22c55e; }
-.wrong { color:#ef4444; }
+  button {
+    background: #38bdf8;
+    color: black;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  button.secondary {
+    background: #334155;
+    color: white;
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    text-align: center;
+  }
+
+  .stat {
+    background: #0f172a;
+    padding: 12px;
+    border-radius: 10px;
+  }
+
+  .stat-label {
+    font-size: 12px;
+    color: #cbd5e1;
+    margin-bottom: 6px;
+  }
+
+  .stat-value {
+    font-size: 22px;
+    font-weight: bold;
+  }
+
+  .question {
+    font-size: 24px;
+    margin: 15px 0;
+    line-height: 1.4;
+  }
+
+  .hint {
+    color: #cbd5e1;
+    font-size: 14px;
+    margin-bottom: 10px;
+  }
+
+  .correct {
+    color: #22c55e;
+    font-weight: bold;
+  }
+
+  .wrong {
+    color: #ef4444;
+    font-weight: bold;
+  }
+
+  .muted {
+    color: #cbd5e1;
+    font-size: 13px;
+  }
+
+  .history-item {
+    border-top: 1px solid #334155;
+    padding: 10px 0;
+  }
+
+  .history-q {
+    font-size: 14px;
+    margin-bottom: 4px;
+  }
+
+  .history-a {
+    font-size: 13px;
+    color: #cbd5e1;
+  }
+
+  @media (max-width: 640px) {
+    .stats {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .question {
+      font-size: 21px;
+    }
+  }
 </style>
 </head>
-
 <body>
+<div class="container">
 
-<h1>FP&A Mental Math</h1>
+  <h1>FP&A Mental Math</h1>
 
-<div class="card">
-<select id="mode">
-<option value="mixed">Mixed</option>
-<option value="growth">Growth %</option>
-<option value="gap">Gap to Target</option>
-<option value="uplift">Required Uplift</option>
-<option value="pipeline">Pipeline Conversion</option>
-</select>
+  <div class="card">
+    <label>Question type</label>
+    <select id="mode">
+      <option value="mixed">Mixed</option>
+      <option value="growth">Growth %</option>
+      <option value="gap">Gap to Target</option>
+      <option value="uplift">Required Uplift %</option>
+      <option value="pipeline">Pipeline Conversion</option>
+      <option value="yield">Yield Headroom</option>
+    </select>
 
-<select id="level">
-<option value="1">Level 1</option>
-<option value="2">Level 2</option>
-<option value="3">Level 3</option>
-</select>
+    <label>Level</label>
+    <select id="level">
+      <option value="0">Level 0 — tutorial</option>
+      <option value="1">Level 1 — very easy</option>
+      <option value="2">Level 2 — easy</option>
+      <option value="3" selected>Level 3 — medium</option>
+      <option value="4">Level 4 — hard</option>
+      <option value="5">Level 5 — realistic</option>
+    </select>
 
-<button onclick="start()">Start Round</button>
-</div>
+    <label>Round length</label>
+    <select id="roundLength">
+      <option value="30">30 seconds</option>
+      <option value="60" selected>60 seconds</option>
+      <option value="90">90 seconds</option>
+      <option value="120">120 seconds</option>
+    </select>
 
-<div class="card stats">
-<div>Time: <span id="time">0</span></div>
-<div>Score: <span id="score">0</span></div>
-</div>
+    <label>Answer mode</label>
+    <select id="answerMode">
+      <option value="approx" selected>Approximate</option>
+      <option value="exact">Exact</option>
+    </select>
 
-<div class="card">
-<div id="question" class="question">Press Start</div>
-<input id="answer" placeholder="Answer">
-<button onclick="submitAnswer()">Submit</button>
-<div id="feedback"></div>
+    <button onclick="startRound()">Start Round</button>
+    <button class="secondary" onclick="resetRound()">Reset</button>
+  </div>
+
+  <div class="card">
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-label">Time</div>
+        <div class="stat-value" id="time">0</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Score</div>
+        <div class="stat-value" id="score">0</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Attempts</div>
+        <div class="stat-value" id="attempts">0</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Accuracy</div>
+        <div class="stat-value" id="accuracy">0%</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div id="question" class="question">Press Start Round</div>
+    <div id="hint" class="hint">Answer as a plain number. For percentages, enter 12.5 not 12.5%.</div>
+    <input id="answer" type="number" step="any" placeholder="Type answer here">
+    <button onclick="submitAnswer()">Submit</button>
+    <button class="secondary" onclick="skipQuestion()">Skip</button>
+    <div id="feedback" style="margin-top:12px;"></div>
+  </div>
+
+  <div class="card">
+    <div style="font-weight:bold; margin-bottom:8px;">Recent Questions</div>
+    <div id="history" class="muted">No attempts yet.</div>
+  </div>
+
 </div>
 
 <script>
-
-let time = 60;
+let timeLeft = 0;
 let score = 0;
-let timer;
-let correctAnswer = 0;
+let attempts = 0;
+let correctCount = 0;
+let timer = null;
+let active = false;
+let currentQuestion = null;
+let historyItems = [];
 
-function rand(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
-
-function genQuestion(){
-  let mode = document.getElementById("mode").value;
-  let level = Number(document.getElementById("level").value);
-
-  let a = rand(50,150);
-  let b = rand(60,180);
-
-  if(mode === "growth"){
-    correctAnswer = ((b-a)/a*100).toFixed(1);
-    return `Revenue from ${a} to ${b}. Growth %?`;
-  }
-
-  if(mode === "gap"){
-    correctAnswer = (b-a).toFixed(1);
-    return `Current ${a}, Target ${b}. Gap?`;
-  }
-
-  if(mode === "uplift"){
-    correctAnswer = ((b-a)/a*100).toFixed(1);
-    return `Forecast ${a}, Target ${b}. Uplift %?`;
-  }
-
-  if(mode === "pipeline"){
-    let conv = rand(5,25);
-    correctAnswer = (a*conv/100).toFixed(1);
-    return `Pipeline ${a} @ ${conv}%. Convert to?`;
-  }
-
-  // mixed
-  return genQuestion(["growth","gap","uplift","pipeline"][rand(0,3)]);
+function randInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function start(){
-  score = 0;
-  time = 60;
-  document.getElementById("score").innerText = score;
-
-  nextQuestion();
-
-  timer = setInterval(()=>{
-    time--;
-    document.getElementById("time").innerText = time;
-    if(time<=0){
-      clearInterval(timer);
-      document.getElementById("question").innerText = "Time up!";
-    }
-  },1000);
+function pick(arr) {
+  return arr[randInt(0, arr.length - 1)];
 }
 
-function nextQuestion(){
-  let q = genQuestion();
-  document.getElementById("question").innerText = q;
-  document.getElementById("answer").value = "";
+function round1(n) {
+  return Math.round(n * 10) / 10;
 }
 
-function submitAnswer(){
-  let user = Number(document.getElementById("answer").value);
+function fmt(n) {
+  return Math.abs(n - Math.round(n)) < 0.0001 ? String(Math.round(n)) : String(round1(n));
+}
 
-  if(Math.abs(user - correctAnswer) < 1){
-    score++;
-    document.getElementById("feedback").innerHTML = "<span class='correct'>Correct</span>";
+function getLevel() {
+  return Number(document.getElementById("level").value);
+}
+
+function getMode() {
+  return document.getElementById("mode").value;
+}
+
+function getAnswerMode() {
+  return document.getElementById("answerMode").value;
+}
+
+function money(level) {
+  if (level === 0) return pick([20, 40, 50, 60]);
+  if (level === 1) return pick([20, 30, 40, 50, 60, 80, 100]);
+  if (level === 2) return pick([35, 45, 60, 75, 90, 120]);
+  if (level === 3) return randInt(50, 200);
+  if (level === 4) return round1(Math.random() * 220 + 40);
+  return round1(Math.random() * 350 + 50);
+}
+
+function percent(level, allowDecimal = false) {
+  if (level === 0) return pick([10, 20, 25]);
+  if (level === 1) return pick([5, 10, 20, 25]);
+  if (level === 2) return pick([8, 12, 15, 18]);
+  if (level === 3) return allowDecimal ? pick([7.5, 9.5, 12.5, 17.5]) : pick([7, 9, 11, 13, 17]);
+  if (level === 4) return allowDecimal ? pick([6.5, 8.5, 11.5, 14.5, 18.5]) : pick([6, 8, 11, 14, 18]);
+  return allowDecimal ? round1(Math.random() * 18 + 4) : randInt(4, 22);
+}
+
+function tolerance(correctAnswer) {
+  if (getAnswerMode() === "exact") return 0.05;
+  const absVal = Math.abs(correctAnswer);
+  if (absVal < 10) return 0.4;
+  if (absVal < 100) return 1.0;
+  return absVal * 0.025;
+}
+
+function makeGrowthQuestion(level) {
+  let start, pct, end;
+
+  if (level === 0) {
+    start = pick([50, 80, 100]);
+    pct = pick([10, 20, 25]);
+    end = start * (1 + pct / 100);
+  } else if (level === 1) {
+    const examples = [
+      [100, 110], [80, 100], [60, 75], [50, 60], [40, 50]
+    ];
+    [start, end] = pick(examples);
   } else {
-    document.getElementById("feedback").innerHTML = "<span class='wrong'>Ans: "+correctAnswer+"</span>";
+    start = money(level);
+    pct = percent(level, level >= 3);
+    end = round1(start * (1 + pct / 100));
   }
 
+  const answer = round1(((end - start) / start) * 100);
+
+  return {
+    text: `Revenue moves from $${fmt(start)}m to $${fmt(end)}m. What is the growth %?`,
+    hint: "Enter the percentage only, e.g. 12.5",
+    answer
+  };
+}
+
+function makeGapQuestion(level) {
+  let current, target;
+
+  if (level === 0) {
+    current = pick([40, 50, 60]);
+    target = current + pick([10, 20]);
+  } else if (level === 1) {
+    current = pick([55, 62, 70, 72, 80]);
+    target = current + pick([8, 10, 12, 15]);
+  } else if (level === 2) {
+    current = pick([45, 60, 75, 90, 110]);
+    target = current + pick([12, 18, 20, 25]);
+  } else {
+    current = money(level);
+    target = round1(current + (level <= 3 ? randInt(10, 35) : Math.random() * 45 + 10));
+  }
+
+  return {
+    text: `Current landing is $${fmt(current)}m and target is $${fmt(target)}m. What is the gap to target in $m?`,
+    hint: "Enter the $m gap only",
+    answer: round1(target - current)
+  };
+}
+
+function makeUpliftQuestion(level) {
+  let forecast, target;
+
+  if (level === 0) {
+    forecast = pick([50, 80, 100]);
+    target = forecast * 1.2;
+  } else if (level === 1) {
+    const examples = [
+      [100, 110], [80, 100], [60, 72], [50, 60]
+    ];
+    [forecast, target] = pick(examples);
+  } else {
+    forecast = money(level);
+    const pct = percent(level, level >= 3);
+    target = round1(forecast * (1 + pct / 100));
+  }
+
+  return {
+    text: `Forecast is $${fmt(forecast)}m and target is $${fmt(target)}m. What % uplift is required from forecast to hit target?`,
+    hint: "Enter the uplift percentage",
+    answer: round1(((target - forecast) / forecast) * 100)
+  };
+}
+
+function makePipelineQuestion(level) {
+  let pipe, conv;
+
+  if (level === 0) {
+    pipe = pick([40, 60, 80, 100]);
+    conv = pick([10, 20, 25]);
+  } else if (level === 1) {
+    pipe = pick([40, 60, 80, 100]);
+    conv = pick([10, 20, 25]);
+  } else if (level === 2) {
+    pipe = pick([45, 70, 90, 120]);
+    conv = pick([8, 12, 15, 20]);
+  } else {
+    pipe = money(level);
+    conv = percent(level, level >= 3);
+  }
+
+  return {
+    text: `Open pipeline is $${fmt(pipe)}m with ${fmt(conv)}% expected conversion. How much NB should this convert into in $m?`,
+    hint: "Enter the converted $m",
+    answer: round1(pipe * conv / 100)
+  };
+}
+
+function makeYieldQuestion(level) {
+  let weighted, quoted;
+
+  if (level === 0) {
+    weighted = pick([4, 5, 6]);
+    quoted = weighted + pick([2, 3]);
+  } else if (level === 1) {
+    weighted = pick([5, 6, 8, 10]);
+    quoted = weighted + pick([2, 3, 4]);
+  } else if (level === 2) {
+    weighted = pick([6, 8, 10, 12, 15]);
+    quoted = weighted + pick([2, 4, 5]);
+  } else {
+    weighted = round1((level <= 3 ? randInt(4, 18) : Math.random() * 18 + 4));
+    quoted = round1(weighted + (level <= 3 ? randInt(2, 8) : Math.random() * 8 + 2));
+  }
+
+  return {
+    text: `Weighted uplift is $${fmt(weighted)}m and quoted uplift is $${fmt(quoted)}m. What is the extra headroom from weighted to quoted in $m?`,
+    hint: "Enter the headroom in $m",
+    answer: round1(quoted - weighted)
+  };
+}
+
+function generateQuestionByMode(mode) {
+  const level = getLevel();
+
+  if (mode === "growth") return makeGrowthQuestion(level);
+  if (mode === "gap") return makeGapQuestion(level);
+  if (mode === "uplift") return makeUpliftQuestion(level);
+  if (mode === "pipeline") return makePipelineQuestion(level);
+  if (mode === "yield") return makeYieldQuestion(level);
+
+  const modes = ["growth", "gap", "uplift", "pipeline", "yield"];
+  return generateQuestionByMode(pick(modes));
+}
+
+function nextQuestion() {
+  currentQuestion = generateQuestionByMode(getMode());
+  document.getElementById("question").innerText = currentQuestion.text;
+  document.getElementById("hint").innerText = currentQuestion.hint;
+  document.getElementById("answer").value = "";
+  document.getElementById("feedback").innerHTML = "";
+  document.getElementById("answer").focus();
+}
+
+function updateStats() {
+  document.getElementById("time").innerText = timeLeft;
   document.getElementById("score").innerText = score;
+  document.getElementById("attempts").innerText = attempts;
+  const acc = attempts === 0 ? 0 : Math.round((correctCount / attempts) * 100);
+  document.getElementById("accuracy").innerText = `${acc}%`;
+}
+
+function updateHistory() {
+  const historyDiv = document.getElementById("history");
+  if (historyItems.length === 0) {
+    historyDiv.innerHTML = "No attempts yet.";
+    return;
+  }
+
+  historyDiv.innerHTML = historyItems.slice(-8).reverse().map(item => `
+    <div class="history-item">
+      <div class="history-q">${item.q}</div>
+      <div class="history-a">Your answer: ${item.user} | Correct: ${item.correct} | <span class="${item.ok ? 'correct' : 'wrong'}">${item.ok ? 'Correct' : 'Wrong'}</span></div>
+    </div>
+  `).join("");
+}
+
+function startRound() {
+  clearInterval(timer);
+  timeLeft = Number(document.getElementById("roundLength").value);
+  score = 0;
+  attempts = 0;
+  correctCount = 0;
+  active = true;
+  updateStats();
+  nextQuestion();
+
+  timer = setInterval(() => {
+    timeLeft--;
+    updateStats();
+
+    if (timeLeft <= 0) {
+      clearInterval(timer);
+      active = false;
+      document.getElementById("question").innerText = `Time up. Final score: ${score}`;
+      document.getElementById("hint").innerText = "Press Start Round to go again.";
+      document.getElementById("feedback").innerHTML = "";
+    }
+  }, 1000);
+}
+
+function resetRound() {
+  clearInterval(timer);
+  timeLeft = 0;
+  score = 0;
+  attempts = 0;
+  correctCount = 0;
+  active = false;
+  currentQuestion = null;
+  document.getElementById("question").innerText = "Press Start Round";
+  document.getElementById("hint").innerText = "Answer as a plain number. For percentages, enter 12.5 not 12.5%.";
+  document.getElementById("feedback").innerHTML = "";
+  document.getElementById("answer").value = "";
+  updateStats();
+}
+
+function submitAnswer() {
+  if (!active || !currentQuestion) return;
+
+  const raw = document.getElementById("answer").value.trim();
+  if (raw === "") return;
+
+  const user = Number(raw);
+  if (Number.isNaN(user)) return;
+
+  attempts++;
+  const correct = currentQuestion.answer;
+  const ok = Math.abs(user - correct) <= tolerance(correct);
+
+  if (ok) {
+    score++;
+    correctCount++;
+    document.getElementById("feedback").innerHTML = `<span class="correct">Correct</span>`;
+  } else {
+    document.getElementById("feedback").innerHTML = `<span class="wrong">Correct answer: ${fmt(correct)}</span>`;
+  }
+
+  historyItems.push({
+    q: currentQuestion.text,
+    user: raw,
+    correct: fmt(correct),
+    ok
+  });
+
+  updateStats();
+  updateHistory();
   nextQuestion();
 }
 
-</script>
+function skipQuestion() {
+  if (!active || !currentQuestion) return;
 
+  historyItems.push({
+    q: currentQuestion.text,
+    user: "Skipped",
+    correct: fmt(currentQuestion.answer),
+    ok: false
+  });
+
+  document.getElementById("feedback").innerHTML = `<span class="wrong">Skipped. Correct answer: ${fmt(currentQuestion.answer)}</span>`;
+  updateHistory();
+  nextQuestion();
+}
+
+document.getElementById("answer").addEventListener("keydown", function(event) {
+  if (event.key === "Enter") {
+    submitAnswer();
+  }
+});
+
+updateStats();
+</script>
 </body>
 </html>
