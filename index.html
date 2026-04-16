@@ -1,1 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mental Math Trainer</title>
+<style>
+body { font-family: Arial; text-align: center; background: #0f172a; color: white; }
+button { padding: 15px; margin: 10px; font-size: 18px; width: 80%; border-radius: 10px; }
+input { padding: 15px; font-size: 20px; width: 80%; text-align: center; }
+</style>
+</head>
 
+<body>
+
+<h2>Mental Math Trainer</h2>
+
+<p id="timer">Time: 60</p>
+<p id="question">Press Start</p>
+
+<input id="answer" type="number" placeholder="Your answer">
+<br>
+
+<button onclick="start()">Start Round</button>
+<button onclick="submitAnswer()">Submit</button>
+
+<p id="score">Score: 0</p>
+
+<script>
+let time = 60;
+let score = 0;
+let currentAnswer = 0;
+let timer;
+
+function randomQuestion() {
+    let a = Math.floor(Math.random()*90)+10;
+    let b = Math.floor(Math.random()*90)+10;
+    currentAnswer = Math.round(a * b / 10);
+    document.getElementById("question").innerText = a + " × " + b + " ÷ 10";
+}
+
+function start() {
+    score = 0;
+    time = 60;
+    document.getElementById("score").innerText = "Score: 0";
+    randomQuestion();
+
+    timer = setInterval(() => {
+        time--;
+        document.getElementById("timer").innerText = "Time: " + time;
+
+        if (time <= 0) {
+            clearInterval(timer);
+            document.getElementById("question").innerText = "Time's up!";
+        }
+    }, 1000);
+}
+
+function submitAnswer() {
+    let user = Number(document.getElementById("answer").value);
+    if (user === currentAnswer) {
+        score++;
+        document.getElementById("score").innerText = "Score: " + score;
+    }
+    document.getElementById("answer").value = "";
+    randomQuestion();
+}
+</script>
+
+</body>
+</html>
