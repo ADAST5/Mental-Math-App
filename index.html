@@ -9,7 +9,7 @@
       font-family: Arial, sans-serif;
       background: #0f172a;
       color: white;
-      padding: 15px;
+      padding: 12px;
       margin: 0;
     }
 
@@ -20,14 +20,15 @@
 
     h1 {
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
+      font-size: 28px;
     }
 
     .card {
       background: #1e293b;
-      padding: 15px;
+      padding: 14px;
       border-radius: 12px;
-      margin-bottom: 15px;
+      margin-bottom: 12px;
     }
 
     label {
@@ -66,41 +67,60 @@
       color: black;
     }
 
-    .stats {
+    #gameScreen {
+      min-height: 100vh;
+    }
+
+    .game-topbar {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
+      grid-template-columns: auto 1fr 1fr 1fr;
+      gap: 8px;
+      align-items: stretch;
+      margin-bottom: 10px;
+    }
+
+    .mini-stat {
+      background: #1e293b;
+      border-radius: 10px;
+      padding: 8px 6px;
       text-align: center;
     }
 
-    .stat {
-      background: #0f172a;
-      padding: 12px;
-      border-radius: 10px;
-    }
-
-    .stat-label {
-      font-size: 12px;
+    .mini-stat-label {
+      font-size: 11px;
       color: #cbd5e1;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
     }
 
-    .stat-value {
-      font-size: 22px;
+    .mini-stat-value {
+      font-size: 18px;
       font-weight: bold;
     }
 
+    .back-btn {
+      margin-top: 0;
+      height: 100%;
+      white-space: nowrap;
+    }
+
+    .game-card {
+      padding: 12px;
+    }
+
     .question {
-      font-size: 24px;
-      margin: 15px 0;
-      line-height: 1.4;
-      min-height: 68px;
+      font-size: 28px;
+      margin: 8px 0 10px;
+      line-height: 1.25;
+      min-height: 44px;
+      text-align: center;
+      font-weight: bold;
     }
 
     .hint {
       color: #cbd5e1;
-      font-size: 14px;
-      margin-bottom: 12px;
+      font-size: 12px;
+      margin-bottom: 10px;
+      text-align: center;
     }
 
     .correct {
@@ -135,17 +155,18 @@
 
     .answer-display {
       width: 100%;
-      min-height: 58px;
+      min-height: 52px;
       background: white;
       color: black;
       border-radius: 8px;
-      padding: 14px;
-      font-size: 26px;
+      padding: 10px 12px;
+      font-size: 24px;
       box-sizing: border-box;
       display: flex;
       align-items: center;
       justify-content: flex-end;
       overflow-x: auto;
+      margin-bottom: 10px;
     }
 
     .placeholder {
@@ -156,13 +177,13 @@
     .keypad {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin-top: 12px;
+      gap: 8px;
+      margin-top: 8px;
     }
 
     .key {
-      padding: 18px 12px;
-      font-size: 24px;
+      padding: 14px 8px;
+      font-size: 22px;
       border-radius: 10px;
       border: none;
       cursor: pointer;
@@ -178,22 +199,66 @@
     .controls-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 12px;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .compact-feedback {
+      min-height: 22px;
+      margin-top: 8px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .history-toggle {
+      margin-top: 10px;
+    }
+
+    #historyWrap {
+      display: none;
     }
 
     @media (max-width: 640px) {
-      .stats {
-        grid-template-columns: repeat(2, 1fr);
+      body {
+        padding: 10px;
+      }
+
+      .card {
+        padding: 12px;
+        margin-bottom: 10px;
+      }
+
+      .game-topbar {
+        grid-template-columns: auto 1fr 1fr 1fr;
+        gap: 6px;
+      }
+
+      .mini-stat {
+        padding: 7px 4px;
+      }
+
+      .mini-stat-label {
+        font-size: 10px;
+      }
+
+      .mini-stat-value {
+        font-size: 16px;
       }
 
       .question {
-        font-size: 21px;
+        font-size: 24px;
+        min-height: 38px;
+      }
+
+      .answer-display {
+        min-height: 48px;
+        font-size: 22px;
+        padding: 10px;
       }
 
       .key {
-        padding: 16px 10px;
-        font-size: 22px;
+        padding: 13px 6px;
+        font-size: 20px;
       }
     }
   </style>
@@ -243,34 +308,28 @@
     </div>
 
     <div id="gameScreen" style="display:none;">
-      <div class="card">
-        <button class="secondary" onclick="goBack()">Back</button>
-      </div>
+      <div class="game-topbar">
+        <button class="secondary back-btn" onclick="goBack()">Back</button>
 
-      <div class="card">
-        <div class="stats">
-          <div class="stat">
-            <div class="stat-label">Time</div>
-            <div class="stat-value" id="time">0</div>
-          </div>
-          <div class="stat">
-            <div class="stat-label">Score</div>
-            <div class="stat-value" id="score">0</div>
-          </div>
-          <div class="stat">
-            <div class="stat-label">Attempts</div>
-            <div class="stat-value" id="attempts">0</div>
-          </div>
-          <div class="stat">
-            <div class="stat-label">Accuracy</div>
-            <div class="stat-value" id="accuracy">0%</div>
-          </div>
+        <div class="mini-stat">
+          <div class="mini-stat-label">Time</div>
+          <div class="mini-stat-value" id="time">0</div>
+        </div>
+
+        <div class="mini-stat">
+          <div class="mini-stat-label">Score</div>
+          <div class="mini-stat-value" id="score">0</div>
+        </div>
+
+        <div class="mini-stat">
+          <div class="mini-stat-label">Acc</div>
+          <div class="mini-stat-value" id="accuracy">0%</div>
         </div>
       </div>
 
-      <div class="card">
+      <div class="card game-card">
         <div id="question" class="question">Press Start Round</div>
-        <div id="hint" class="hint">Tap the keypad below to enter your answer. For percentages, enter just the number, for example 12.5</div>
+        <div id="hint" class="hint">Tap the keypad below to enter your answer</div>
 
         <div class="answer-display" id="answerDisplay">
           <span class="placeholder">Tap numbers below</span>
@@ -295,7 +354,7 @@
         </div>
 
         <div class="controls-row">
-          <button class="secondary" onclick="backspace()">Delete</button>
+          <button class="secondary" onclick="backspace()">Del</button>
           <button class="secondary" onclick="clearAnswer()">Clear</button>
         </div>
 
@@ -304,12 +363,14 @@
           <button class="submit" onclick="submitAnswer()">Submit</button>
         </div>
 
-        <div id="feedback" style="margin-top:12px;"></div>
-      </div>
+        <div id="feedback" class="compact-feedback"></div>
 
-      <div class="card">
-        <div style="font-weight:bold; margin-bottom:8px;">Recent Questions</div>
-        <div id="history" class="muted">No attempts yet.</div>
+        <button class="secondary history-toggle" onclick="toggleHistory()">Show History</button>
+
+        <div id="historyWrap">
+          <div style="font-weight:bold; margin:10px 0 8px;">Recent Questions</div>
+          <div id="history" class="muted">No attempts yet.</div>
+        </div>
       </div>
     </div>
   </div>
@@ -370,180 +431,108 @@
       if (level === 0) {
         const a = randInt(1, 10);
         const b = randInt(1, 10);
-        return {
-          text: `${a} + ${b}`,
-          hint: "Add the two numbers",
-          answer: a + b
-        };
+        return { text: `${a} + ${b}`, hint: "Add the two numbers", answer: a + b };
       }
 
       if (level === 1) {
         const a = randInt(1, 12);
         const b = randInt(1, 12);
-        return {
-          text: `${a} + ${b}`,
-          hint: "Add the two numbers",
-          answer: a + b
-        };
+        return { text: `${a} + ${b}`, hint: "Add the two numbers", answer: a + b };
       }
 
       if (level === 2) {
         const a = randInt(5, 20);
         const b = randInt(5, 20);
-        return {
-          text: `${a} + ${b}`,
-          hint: "Add the two numbers",
-          answer: a + b
-        };
+        return { text: `${a} + ${b}`, hint: "Add the two numbers", answer: a + b };
       }
 
       if (level === 3) {
         const a = randInt(10, 30);
         const b = randInt(10, 30);
-        return {
-          text: `${a} + ${b}`,
-          hint: "Add the two numbers",
-          answer: a + b
-        };
+        return { text: `${a} + ${b}`, hint: "Add the two numbers", answer: a + b };
       }
 
       if (level === 4) {
         const a = round1(Math.random() * 60 + 20);
         const b = round1(Math.random() * 60 + 20);
-        return {
-          text: `${fmt(a)} + ${fmt(b)}`,
-          hint: "Add the two numbers",
-          answer: round2(a + b)
-        };
+        return { text: `${fmt(a)} + ${fmt(b)}`, hint: "Add the two numbers", answer: round2(a + b) };
       }
 
       const a = round1(Math.random() * 100 + 40);
       const b = round1(Math.random() * 100 + 40);
-      return {
-        text: `${fmt(a)} + ${fmt(b)}`,
-        hint: "Add the two numbers",
-        answer: round2(a + b)
-      };
+      return { text: `${fmt(a)} + ${fmt(b)}`, hint: "Add the two numbers", answer: round2(a + b) };
     }
 
     function makeSubtractionQuestion(level) {
       if (level === 0) {
         let a = randInt(5, 15);
         let b = randInt(1, a);
-        return {
-          text: `${a} - ${b}`,
-          hint: "Subtract the second number from the first",
-          answer: a - b
-        };
+        return { text: `${a} - ${b}`, hint: "Subtract the second number from the first", answer: a - b };
       }
 
       if (level === 1) {
         let a = randInt(8, 20);
         let b = randInt(1, a);
-        return {
-          text: `${a} - ${b}`,
-          hint: "Subtract the second number from the first",
-          answer: a - b
-        };
+        return { text: `${a} - ${b}`, hint: "Subtract the second number from the first", answer: a - b };
       }
 
       if (level === 2) {
         let a = randInt(15, 35);
         let b = randInt(5, a - 1);
-        return {
-          text: `${a} - ${b}`,
-          hint: "Subtract the second number from the first",
-          answer: a - b
-        };
+        return { text: `${a} - ${b}`, hint: "Subtract the second number from the first", answer: a - b };
       }
 
       if (level === 3) {
         let a = randInt(25, 60);
         let b = randInt(10, a - 1);
-        return {
-          text: `${a} - ${b}`,
-          hint: "Subtract the second number from the first",
-          answer: a - b
-        };
+        return { text: `${a} - ${b}`, hint: "Subtract the second number from the first", answer: a - b };
       }
 
       if (level === 4) {
         let a = round1(Math.random() * 80 + 30);
         let b = round1(Math.random() * Math.min(70, a - 1));
-        return {
-          text: `${fmt(a)} - ${fmt(b)}`,
-          hint: "Subtract the second number from the first",
-          answer: round2(a - b)
-        };
+        return { text: `${fmt(a)} - ${fmt(b)}`, hint: "Subtract the second number from the first", answer: round2(a - b) };
       }
 
       let a = round1(Math.random() * 120 + 50);
       let b = round1(Math.random() * Math.min(100, a - 1));
-      return {
-        text: `${fmt(a)} - ${fmt(b)}`,
-        hint: "Subtract the second number from the first",
-        answer: round2(a - b)
-      };
+      return { text: `${fmt(a)} - ${fmt(b)}`, hint: "Subtract the second number from the first", answer: round2(a - b) };
     }
 
     function makeMultiplicationQuestion(level) {
       if (level === 0) {
         const a = randInt(2, 5);
         const b = randInt(2, 5);
-        return {
-          text: `${a} × ${b}`,
-          hint: "Multiply the two numbers",
-          answer: a * b
-        };
+        return { text: `${a} × ${b}`, hint: "Multiply the two numbers", answer: a * b };
       }
 
       if (level === 1) {
         const a = randInt(2, 10);
         const b = randInt(2, 10);
-        return {
-          text: `${a} × ${b}`,
-          hint: "Multiply the two numbers",
-          answer: a * b
-        };
+        return { text: `${a} × ${b}`, hint: "Multiply the two numbers", answer: a * b };
       }
 
       if (level === 2) {
         const a = randInt(3, 12);
         const b = randInt(3, 12);
-        return {
-          text: `${a} × ${b}`,
-          hint: "Multiply the two numbers",
-          answer: a * b
-        };
+        return { text: `${a} × ${b}`, hint: "Multiply the two numbers", answer: a * b };
       }
 
       if (level === 3) {
         const a = randInt(4, 15);
         const b = randInt(4, 15);
-        return {
-          text: `${a} × ${b}`,
-          hint: "Multiply the two numbers",
-          answer: a * b
-        };
+        return { text: `${a} × ${b}`, hint: "Multiply the two numbers", answer: a * b };
       }
 
       if (level === 4) {
         const a = randInt(6, 20);
         const b = randInt(6, 20);
-        return {
-          text: `${a} × ${b}`,
-          hint: "Multiply the two numbers",
-          answer: a * b
-        };
+        return { text: `${a} × ${b}`, hint: "Multiply the two numbers", answer: a * b };
       }
 
       const a = randInt(8, 30);
       const b = randInt(8, 25);
-      return {
-        text: `${a} × ${b}`,
-        hint: "Multiply the two numbers",
-        answer: a * b
-      };
+      return { text: `${a} × ${b}`, hint: "Multiply the two numbers", answer: a * b };
     }
 
     function makeDivisionQuestion(level) {
@@ -551,65 +540,41 @@
         const b = randInt(2, 5);
         const ans = randInt(1, 10);
         const a = b * ans;
-        return {
-          text: `${a} ÷ ${b}`,
-          hint: "Divide the first number by the second",
-          answer: ans
-        };
+        return { text: `${a} ÷ ${b}`, hint: "Divide the first number by the second", answer: ans };
       }
 
       if (level === 1) {
         const b = randInt(2, 10);
         const ans = randInt(2, 10);
         const a = b * ans;
-        return {
-          text: `${a} ÷ ${b}`,
-          hint: "Divide the first number by the second",
-          answer: ans
-        };
+        return { text: `${a} ÷ ${b}`, hint: "Divide the first number by the second", answer: ans };
       }
 
       if (level === 2) {
         const b = randInt(2, 12);
         const ans = randInt(2, 12);
         const a = b * ans;
-        return {
-          text: `${a} ÷ ${b}`,
-          hint: "Divide the first number by the second",
-          answer: ans
-        };
+        return { text: `${a} ÷ ${b}`, hint: "Divide the first number by the second", answer: ans };
       }
 
       if (level === 3) {
         const b = randInt(3, 15);
         const ans = randInt(3, 15);
         const a = b * ans;
-        return {
-          text: `${a} ÷ ${b}`,
-          hint: "Divide the first number by the second",
-          answer: ans
-        };
+        return { text: `${a} ÷ ${b}`, hint: "Divide the first number by the second", answer: ans };
       }
 
       if (level === 4) {
         const b = pick([4, 5, 8, 10, 20, 25]);
         const ans = round1(Math.random() * 20 + 5);
         const a = round1(b * ans);
-        return {
-          text: `${fmt(a)} ÷ ${fmt(b)}`,
-          hint: "Divide the first number by the second",
-          answer: round2(ans)
-        };
+        return { text: `${fmt(a)} ÷ ${fmt(b)}`, hint: "Divide the first number by the second", answer: round2(ans) };
       }
 
       const b = pick([3, 4, 5, 6, 8, 10, 12, 15, 20, 25]);
       const ans = round1(Math.random() * 35 + 5);
       const a = round1(b * ans);
-      return {
-        text: `${fmt(a)} ÷ ${fmt(b)}`,
-        hint: "Divide the first number by the second",
-        answer: round2(ans)
-      };
+      return { text: `${fmt(a)} ÷ ${fmt(b)}`, hint: "Divide the first number by the second", answer: round2(ans) };
     }
 
     function makePercentageQuestion(level) {
@@ -621,11 +586,7 @@
           [50, 10], [50, 20], [50, 30], [50, 40], [50, 50], [50, 80], [50, 100]
         ];
         const [pct, base] = pick(pairs);
-        return {
-          text: `${pct}% of ${base}`,
-          hint: "Work out the percentage of the number",
-          answer: base * pct / 100
-        };
+        return { text: `${pct}% of ${base}`, hint: "Work out the percentage of the number", answer: base * pct / 100 };
       }
 
       if (level === 1) {
@@ -637,11 +598,7 @@
           [50, 25], [50, 35], [50, 45], [50, 70], [50, 90], [50, 120]
         ];
         const [pct, base] = pick(pairs);
-        return {
-          text: `${pct}% of ${base}`,
-          hint: "Work out the percentage of the number",
-          answer: base * pct / 100
-        };
+        return { text: `${pct}% of ${base}`, hint: "Work out the percentage of the number", answer: base * pct / 100 };
       }
 
       if (level === 2) {
@@ -654,11 +611,7 @@
           [12.5, 40], [12.5, 80], [12.5, 120]
         ];
         const [pct, base] = pick(pairs);
-        return {
-          text: `${pct}% of ${base}`,
-          hint: "Work out the percentage of the number",
-          answer: round2(base * pct / 100)
-        };
+        return { text: `${pct}% of ${base}`, hint: "Work out the percentage of the number", answer: round2(base * pct / 100) };
       }
 
       if (level === 3) {
@@ -671,30 +624,18 @@
           [12.5, 64], [12.5, 96], [12.5, 160]
         ];
         const [pct, base] = pick(pairs);
-        return {
-          text: `${pct}% of ${base}`,
-          hint: "Work out the percentage of the number",
-          answer: round2(base * pct / 100)
-        };
+        return { text: `${pct}% of ${base}`, hint: "Work out the percentage of the number", answer: round2(base * pct / 100) };
       }
 
       if (level === 4) {
         const base = round1(Math.random() * 250 + 50);
         const pct = pick([6.5, 7.5, 8.5, 11.5, 12.5, 14.5, 17.5, 22.5]);
-        return {
-          text: `${pct}% of ${fmt(base)}`,
-          hint: "Work out the percentage of the number",
-          answer: round2(base * pct / 100)
-        };
+        return { text: `${pct}% of ${fmt(base)}`, hint: "Work out the percentage of the number", answer: round2(base * pct / 100) };
       }
 
       const base = round1(Math.random() * 400 + 80);
       const pct = round1(Math.random() * 20 + 5);
-      return {
-        text: `${fmt(pct)}% of ${fmt(base)}`,
-        hint: "Work out the percentage of the number",
-        answer: round2(base * pct / 100)
-      };
+      return { text: `${fmt(pct)}% of ${fmt(base)}`, hint: "Work out the percentage of the number", answer: round2(base * pct / 100) };
     }
 
     function generateQuestionByMode(mode) {
@@ -764,7 +705,6 @@
     function updateStats() {
       document.getElementById("time").innerText = timeLeft;
       document.getElementById("score").innerText = score;
-      document.getElementById("attempts").innerText = attempts;
       const acc = attempts === 0 ? 0 : Math.round((correctCount / attempts) * 100);
       document.getElementById("accuracy").innerText = `${acc}%`;
     }
@@ -782,6 +722,19 @@
           <div class="history-a">Your answer: ${item.user} | Correct: ${item.correct} | <span class="${item.ok ? 'correct' : 'wrong'}">${item.ok ? 'Correct' : 'Wrong'}</span></div>
         </div>
       `).join("");
+    }
+
+    function toggleHistory() {
+      const wrap = document.getElementById("historyWrap");
+      const btn = document.querySelector(".history-toggle");
+
+      if (wrap.style.display === "block") {
+        wrap.style.display = "none";
+        btn.textContent = "Show History";
+      } else {
+        wrap.style.display = "block";
+        btn.textContent = "Hide History";
+      }
     }
 
     function startGame() {
@@ -880,6 +833,7 @@
       if (event.key === "Enter") submitAnswer();
     });
 
+    updateHistory();
     updateStats();
     renderAnswerDisplay();
   </script>
