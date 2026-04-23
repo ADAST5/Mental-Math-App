@@ -3,14 +3,35 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mental Math App</title>
+  <title>Mental Math</title>
   <style>
+    :root {
+      --bg: #0b1220;
+      --surface: #121a2b;
+      --surface-2: #1a2438;
+      --surface-3: #22314a;
+      --primary: #5bc0ff;
+      --text: #f3f7fc;
+      --muted: #94a3b8;
+      --success: #22c55e;
+      --error: #f87171;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
+      --radius: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      background: #0f172a;
-      color: white;
-      padding: 12px;
       margin: 0;
+      padding: 12px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Arial, sans-serif;
+      background:
+        radial-gradient(circle at top, rgba(91, 192, 255, 0.08), transparent 30%),
+        linear-gradient(180deg, #0b1220 0%, #0d1424 100%);
+      color: var(--text);
     }
 
     .container {
@@ -18,204 +39,303 @@
       margin: 0 auto;
     }
 
-    h1 {
-      text-align: center;
-      margin-bottom: 16px;
-      font-size: 28px;
+    .panel {
+      background: rgba(18, 26, 43, 0.96);
+      border: 1px solid rgba(148, 163, 184, 0.08);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
     }
 
-    .card {
-      background: #1e293b;
-      padding: 14px;
-      border-radius: 12px;
-      margin-bottom: 12px;
+    .setup-shell {
+      padding: 24px 18px 18px;
+    }
+
+    .title {
+      font-size: 30px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      text-align: center;
+      margin: 0 0 6px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+      margin: 0 0 18px;
+    }
+
+    .setup-card {
+      padding: 16px;
     }
 
     label {
       display: block;
-      margin-top: 10px;
-      margin-bottom: 4px;
-      color: #cbd5e1;
-      font-size: 14px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      margin: 14px 0 6px;
     }
 
     select,
     button {
       width: 100%;
-      padding: 14px;
-      margin-top: 10px;
-      font-size: 16px;
-      border-radius: 8px;
       border: none;
+      border-radius: 14px;
+      padding: 14px 14px;
+      font-size: 16px;
       box-sizing: border-box;
     }
 
+    select {
+      background: var(--surface-2);
+      color: var(--text);
+      border: 1px solid rgba(148, 163, 184, 0.08);
+      appearance: none;
+      outline: none;
+    }
+
     button {
-      background: #38bdf8;
-      color: black;
-      font-weight: bold;
       cursor: pointer;
+      font-weight: 700;
+      transition: transform 0.08s ease, opacity 0.15s ease, background 0.15s ease;
     }
 
-    button.secondary {
-      background: #334155;
-      color: white;
+    button:active {
+      transform: scale(0.985);
     }
 
-    button.submit {
-      background: #38bdf8;
-      color: black;
+    .primary-btn {
+      background: var(--primary);
+      color: #062033;
+      margin-top: 18px;
+    }
+
+    .ghost-btn {
+      background: var(--surface-2);
+      color: var(--text);
+      border: 1px solid rgba(148, 163, 184, 0.08);
     }
 
     #gameScreen {
-      min-height: 100vh;
+      display: none;
+      min-height: calc(100vh - 24px);
     }
 
-    .game-topbar {
+    .topbar {
       display: grid;
       grid-template-columns: auto 1fr 1fr 1fr;
       gap: 8px;
-      align-items: stretch;
       margin-bottom: 10px;
     }
 
-    .mini-stat {
-      background: #1e293b;
-      border-radius: 10px;
+    .chip,
+    .back-chip {
+      background: rgba(18, 26, 43, 0.96);
+      border: 1px solid rgba(148, 163, 184, 0.08);
+      box-shadow: var(--shadow);
+      border-radius: 16px;
+      min-height: 62px;
+    }
+
+    .chip {
       padding: 8px 6px;
       text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
 
-    .mini-stat-label {
-      font-size: 11px;
-      color: #cbd5e1;
+    .chip-label {
+      font-size: 10px;
+      color: var(--muted);
       margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
 
-    .mini-stat-value {
+    .chip-value {
       font-size: 18px;
-      font-weight: bold;
+      font-weight: 700;
+      letter-spacing: -0.02em;
     }
 
-    .back-btn {
-      margin-top: 0;
+    .back-chip {
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .back-chip button {
       height: 100%;
-      white-space: nowrap;
+      min-height: 62px;
+      border-radius: 16px;
+      margin: 0;
+      background: transparent;
+      color: var(--text);
     }
 
     .game-card {
-      padding: 12px;
+      padding: 16px 14px;
     }
 
     .question {
-      font-size: 28px;
-      margin: 8px 0 10px;
-      line-height: 1.25;
-      min-height: 44px;
+      font-size: 30px;
+      line-height: 1.15;
       text-align: center;
-      font-weight: bold;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      min-height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 2px 0 8px;
     }
 
     .hint {
-      color: #cbd5e1;
       font-size: 12px;
-      margin-bottom: 10px;
+      color: var(--muted);
       text-align: center;
+      margin-bottom: 12px;
+      min-height: 16px;
     }
 
-    .correct {
-      color: #22c55e;
-      font-weight: bold;
+    .answer-display {
+      min-height: 58px;
+      border-radius: 16px;
+      background: linear-gradient(180deg, #0d1526 0%, #10192d 100%);
+      border: 1px solid rgba(91, 192, 255, 0.14);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 0 14px;
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      overflow-x: auto;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02);
     }
 
-    .wrong {
-      color: #ef4444;
-      font-weight: bold;
+    .answer-display.correct-flash {
+      border-color: rgba(34, 197, 94, 0.7);
+      box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.18), 0 0 18px rgba(34, 197, 94, 0.15);
     }
 
-    .muted {
-      color: #cbd5e1;
+    .answer-display.error-flash {
+      border-color: rgba(248, 113, 113, 0.7);
+      box-shadow: 0 0 0 1px rgba(248, 113, 113, 0.18), 0 0 18px rgba(248, 113, 113, 0.14);
+    }
+
+    .placeholder {
+      color: #64748b;
+      font-size: 18px;
+      font-weight: 500;
+    }
+
+    .keypad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .key {
+      min-height: 58px;
+      border-radius: 16px;
+      background: var(--surface-2);
+      color: var(--text);
+      border: 1px solid rgba(148, 163, 184, 0.07);
+      font-size: 22px;
+      font-weight: 700;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
+    }
+
+    .key.action {
+      background: var(--surface-3);
+      color: var(--text);
+    }
+
+    .controls-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .submit-btn {
+      background: var(--primary);
+      color: #062033;
+    }
+
+    .feedback {
+      min-height: 22px;
+      margin-top: 10px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .feedback.success {
+      color: var(--success);
+    }
+
+    .feedback.error {
+      color: var(--error);
+    }
+
+    .history-toggle {
+      margin-top: 12px;
+    }
+
+    #historyWrap {
+      display: none;
+      margin-top: 10px;
+      padding-top: 8px;
+    }
+
+    .history-title {
       font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
     }
 
     .history-item {
-      border-top: 1px solid #334155;
+      border-top: 1px solid rgba(148, 163, 184, 0.08);
       padding: 10px 0;
     }
 
     .history-q {
       font-size: 14px;
       margin-bottom: 4px;
+      line-height: 1.35;
     }
 
     .history-a {
-      font-size: 13px;
-      color: #cbd5e1;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.35;
     }
 
-    .answer-display {
-      width: 100%;
-      min-height: 52px;
-      background: white;
-      color: black;
-      border-radius: 8px;
-      padding: 10px 12px;
-      font-size: 24px;
-      box-sizing: border-box;
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      overflow-x: auto;
-      margin-bottom: 10px;
+    .ok {
+      color: var(--success);
+      font-weight: 700;
     }
 
-    .placeholder {
-      color: #64748b;
-      font-size: 18px;
+    .bad {
+      color: var(--error);
+      font-weight: 700;
     }
 
-    .keypad {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      margin-top: 8px;
+    .score-pop {
+      animation: pop 0.22s ease;
     }
 
-    .key {
-      padding: 14px 8px;
-      font-size: 22px;
-      border-radius: 10px;
-      border: none;
-      cursor: pointer;
-      background: #0f172a;
-      color: white;
-      font-weight: bold;
-    }
-
-    .key.action {
-      background: #334155;
-    }
-
-    .controls-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-top: 8px;
-    }
-
-    .compact-feedback {
-      min-height: 22px;
-      margin-top: 8px;
-      text-align: center;
-      font-size: 14px;
-    }
-
-    .history-toggle {
-      margin-top: 10px;
-    }
-
-    #historyWrap {
-      display: none;
+    @keyframes pop {
+      0% { transform: scale(1); }
+      35% { transform: scale(1.14); }
+      100% { transform: scale(1); }
     }
 
     @media (max-width: 640px) {
@@ -223,41 +343,40 @@
         padding: 10px;
       }
 
-      .card {
-        padding: 12px;
-        margin-bottom: 10px;
+      .title {
+        font-size: 28px;
       }
 
-      .game-topbar {
-        grid-template-columns: auto 1fr 1fr 1fr;
+      .topbar {
         gap: 6px;
       }
 
-      .mini-stat {
-        padding: 7px 4px;
+      .chip,
+      .back-chip,
+      .back-chip button {
+        min-height: 58px;
       }
 
-      .mini-stat-label {
-        font-size: 10px;
+      .chip-label {
+        font-size: 9px;
       }
 
-      .mini-stat-value {
+      .chip-value {
         font-size: 16px;
       }
 
       .question {
-        font-size: 24px;
-        min-height: 38px;
+        font-size: 26px;
+        min-height: 62px;
       }
 
       .answer-display {
-        min-height: 48px;
-        font-size: 22px;
-        padding: 10px;
+        min-height: 54px;
+        font-size: 24px;
       }
 
       .key {
-        padding: 13px 6px;
+        min-height: 54px;
         font-size: 20px;
       }
     }
@@ -266,69 +385,74 @@
 <body>
   <div class="container">
     <div id="setupScreen">
-      <h1>Mental Math App</h1>
+      <div class="panel setup-shell">
+        <h1 class="title">Mental Math</h1>
+        <p class="subtitle">Sharpen speed and accuracy</p>
 
-      <div class="card">
-        <label for="mode">Question type</label>
-        <select id="mode">
-          <option value="mixed">Mixed</option>
-          <option value="addition">Addition</option>
-          <option value="subtraction">Subtraction</option>
-          <option value="multiplication">Multiplication</option>
-          <option value="division">Division</option>
-          <option value="percentages">Percentages</option>
-        </select>
+        <div class="setup-card">
+          <label for="mode">Mode</label>
+          <select id="mode">
+            <option value="mixed">Mixed</option>
+            <option value="addition">Addition</option>
+            <option value="subtraction">Subtraction</option>
+            <option value="multiplication">Multiplication</option>
+            <option value="division">Division</option>
+            <option value="percentages">Percentages</option>
+          </select>
 
-        <label for="level">Level</label>
-        <select id="level">
-          <option value="0">Level 0 — tutorial</option>
-          <option value="1">Level 1 — very easy</option>
-          <option value="2">Level 2 — easy</option>
-          <option value="3" selected>Level 3 — medium</option>
-          <option value="4">Level 4 — hard</option>
-          <option value="5">Level 5 — expert</option>
-        </select>
+          <label for="level">Difficulty</label>
+          <select id="level">
+            <option value="0">Level 0 — tutorial</option>
+            <option value="1">Level 1 — very easy</option>
+            <option value="2">Level 2 — easy</option>
+            <option value="3" selected>Level 3 — medium</option>
+            <option value="4">Level 4 — hard</option>
+            <option value="5">Level 5 — expert</option>
+          </select>
 
-        <label for="roundLength">Round length</label>
-        <select id="roundLength">
-          <option value="30">30 seconds</option>
-          <option value="60" selected>60 seconds</option>
-          <option value="90">90 seconds</option>
-          <option value="120">120 seconds</option>
-        </select>
+          <label for="roundLength">Round</label>
+          <select id="roundLength">
+            <option value="30">30 seconds</option>
+            <option value="60" selected>60 seconds</option>
+            <option value="90">90 seconds</option>
+            <option value="120">120 seconds</option>
+          </select>
 
-        <label for="answerMode">Answer mode</label>
-        <select id="answerMode">
-          <option value="approx" selected>Approximate</option>
-          <option value="exact">Exact</option>
-        </select>
+          <label for="answerMode">Tolerance</label>
+          <select id="answerMode">
+            <option value="approx" selected>Approximate</option>
+            <option value="exact">Exact</option>
+          </select>
 
-        <button onclick="startGame()">Start Round</button>
+          <button class="primary-btn" onclick="startGame()">Start Round</button>
+        </div>
       </div>
     </div>
 
-    <div id="gameScreen" style="display:none;">
-      <div class="game-topbar">
-        <button class="secondary back-btn" onclick="goBack()">Back</button>
-
-        <div class="mini-stat">
-          <div class="mini-stat-label">Time</div>
-          <div class="mini-stat-value" id="time">0</div>
+    <div id="gameScreen">
+      <div class="topbar">
+        <div class="back-chip">
+          <button onclick="goBack()">Back</button>
         </div>
 
-        <div class="mini-stat">
-          <div class="mini-stat-label">Score</div>
-          <div class="mini-stat-value" id="score">0</div>
+        <div class="chip">
+          <div class="chip-label">Time</div>
+          <div class="chip-value" id="time">0</div>
         </div>
 
-        <div class="mini-stat">
-          <div class="mini-stat-label">Acc</div>
-          <div class="mini-stat-value" id="accuracy">0%</div>
+        <div class="chip">
+          <div class="chip-label">Score</div>
+          <div class="chip-value" id="score">0</div>
+        </div>
+
+        <div class="chip">
+          <div class="chip-label">Acc</div>
+          <div class="chip-value" id="accuracy">0%</div>
         </div>
       </div>
 
-      <div class="card game-card">
-        <div id="question" class="question">Press Start Round</div>
+      <div class="panel game-card">
+        <div id="question" class="question">Press Start</div>
         <div id="hint" class="hint">Tap the keypad below to enter your answer</div>
 
         <div class="answer-display" id="answerDisplay">
@@ -354,22 +478,22 @@
         </div>
 
         <div class="controls-row">
-          <button class="secondary" onclick="backspace()">Del</button>
-          <button class="secondary" onclick="clearAnswer()">Clear</button>
+          <button class="ghost-btn" onclick="backspace()">Del</button>
+          <button class="ghost-btn" onclick="clearAnswer()">Clear</button>
         </div>
 
         <div class="controls-row">
-          <button class="secondary" onclick="skipQuestion()">Skip</button>
-          <button class="submit" onclick="submitAnswer()">Submit</button>
+          <button class="ghost-btn" onclick="skipQuestion()">Skip</button>
+          <button class="submit-btn" onclick="submitAnswer()">Submit</button>
         </div>
 
-        <div id="feedback" class="compact-feedback"></div>
+        <div id="feedback" class="feedback"></div>
 
-        <button class="secondary history-toggle" onclick="toggleHistory()">Show History</button>
+        <button class="ghost-btn history-toggle" onclick="toggleHistory()">History</button>
 
         <div id="historyWrap">
-          <div style="font-weight:bold; margin:10px 0 8px;">Recent Questions</div>
-          <div id="history" class="muted">No attempts yet.</div>
+          <div class="history-title">Recent Questions</div>
+          <div id="history">No attempts yet.</div>
         </div>
       </div>
     </div>
@@ -694,11 +818,30 @@
       renderAnswerDisplay();
     }
 
+    function pulseScore() {
+      const el = document.getElementById("score");
+      el.classList.remove("score-pop");
+      void el.offsetWidth;
+      el.classList.add("score-pop");
+    }
+
+    function flashAnswer(type) {
+      const el = document.getElementById("answerDisplay");
+      el.classList.remove("correct-flash", "error-flash");
+      void el.offsetWidth;
+      el.classList.add(type === "correct" ? "correct-flash" : "error-flash");
+      setTimeout(() => {
+        el.classList.remove("correct-flash", "error-flash");
+      }, 260);
+    }
+
     function nextQuestion() {
       currentQuestion = generateQuestionByMode(getMode());
       document.getElementById("question").innerText = currentQuestion.text;
       document.getElementById("hint").innerText = currentQuestion.hint;
-      document.getElementById("feedback").innerHTML = "";
+      const feedback = document.getElementById("feedback");
+      feedback.innerHTML = "";
+      feedback.className = "feedback";
       clearAnswer();
     }
 
@@ -719,7 +862,10 @@
       historyDiv.innerHTML = historyItems.slice(-8).reverse().map(item => `
         <div class="history-item">
           <div class="history-q">${item.q}</div>
-          <div class="history-a">Your answer: ${item.user} | Correct: ${item.correct} | <span class="${item.ok ? 'correct' : 'wrong'}">${item.ok ? 'Correct' : 'Wrong'}</span></div>
+          <div class="history-a">
+            Your answer: ${item.user} | Correct: ${item.correct} |
+            <span class="${item.ok ? 'ok' : 'bad'}">${item.ok ? 'Correct' : 'Wrong'}</span>
+          </div>
         </div>
       `).join("");
     }
@@ -727,10 +873,9 @@
     function toggleHistory() {
       const wrap = document.getElementById("historyWrap");
       const btn = document.querySelector(".history-toggle");
-
       if (wrap.style.display === "block") {
         wrap.style.display = "none";
-        btn.textContent = "Show History";
+        btn.textContent = "History";
       } else {
         wrap.style.display = "block";
         btn.textContent = "Hide History";
@@ -771,7 +916,9 @@
           active = false;
           document.getElementById("question").innerText = `Time up. Final score: ${score}`;
           document.getElementById("hint").innerText = "Tap Back to return to settings, or start another round.";
-          document.getElementById("feedback").innerHTML = "";
+          const feedback = document.getElementById("feedback");
+          feedback.innerHTML = "";
+          feedback.className = "feedback";
           clearAnswer();
         }
       }, 1000);
@@ -789,13 +936,19 @@
       attempts++;
       const correct = currentQuestion.answer;
       const ok = Math.abs(user - correct) <= tolerance(correct);
+      const feedback = document.getElementById("feedback");
 
       if (ok) {
         score++;
         correctCount++;
-        document.getElementById("feedback").innerHTML = `<span class="correct">Correct</span>`;
+        feedback.innerHTML = "Correct";
+        feedback.className = "feedback success";
+        pulseScore();
+        flashAnswer("correct");
       } else {
-        document.getElementById("feedback").innerHTML = `<span class="wrong">Correct answer: ${fmt(correct)}</span>`;
+        feedback.innerHTML = `Correct answer: ${fmt(correct)}`;
+        feedback.className = "feedback error";
+        flashAnswer("error");
       }
 
       historyItems.push({
@@ -807,7 +960,10 @@
 
       updateStats();
       updateHistory();
-      nextQuestion();
+
+      setTimeout(() => {
+        if (active) nextQuestion();
+      }, 180);
     }
 
     function skipQuestion() {
@@ -820,9 +976,16 @@
         ok: false
       });
 
-      document.getElementById("feedback").innerHTML = `<span class="wrong">Skipped. Correct answer: ${fmt(currentQuestion.answer)}</span>`;
+      const feedback = document.getElementById("feedback");
+      feedback.innerHTML = `Skipped. Correct answer: ${fmt(currentQuestion.answer)}`;
+      feedback.className = "feedback error";
+
       updateHistory();
-      nextQuestion();
+      flashAnswer("error");
+
+      setTimeout(() => {
+        if (active) nextQuestion();
+      }, 180);
     }
 
     document.addEventListener("keydown", function(event) {
